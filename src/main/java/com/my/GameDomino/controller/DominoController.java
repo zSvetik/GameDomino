@@ -1,71 +1,56 @@
 package com.my.GameDomino.controller;
 
+import java.io.IOException;
+
+import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.http.*;
 
-import com.my.GameDomino.dao.DominoDAO;
-import com.my.GameDomino.dao.DominoDAOImpl;
+import com.my.GameDomino.dao.*;
+import com.my.GameDomino.entity.*;
+import com.my.GameDomino.utils.*;
 
-@WebServlet("/DominoController")
+@WebServlet("/setDominoList")
 public class DominoController extends HttpServlet {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private DominoDAO dominoDAO;
-	
-	public DominoController() {
-		dominoDAO = new DominoDAOImpl();
-	}
 
-	/*
-    public static final String lIST_STUDENT = "/listStudent.jsp";
-    public static final String INSERT_OR_EDIT = "/student.jsp";
- 
- 
+    private static final long serialVersionUID = 1L;
+
+    private DominoDAO dominoDAO;
+    ChainDomino chainDomino;
+
+    public DominoController() {
+        dominoDAO = new DominoDAOImpl();
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String forward = "";
-        String action = request.getParameter( "action" );
- 
-        if( action.equalsIgnoreCase( "delete" ) ) {
-            forward = lIST_STUDENT;
-            int studentId = Integer.parseInt( request.getParameter("studentId") );
-            dao.deleteStudent(studentId);
-            request.setAttribute("students", dao.getAllStudents() );
+        String message = "";
+        if ("set".equalsIgnoreCase(request.getParameter("type"))) {
+            if (!"".equalsIgnoreCase(request.getParameter("count"))) {
+                int count = Integer.parseInt(request.getParameter("count"));
+                chainDomino = Utils.selectedListDomino(Utils.getRandomCount(count));
+                Utils.fillAllChain(chainDomino);
+                message = "Набор из " + count + " доминошек: " + chainDomino;
+            } else {
+                message = "Введите количество доминошек!";
+            }
+        } else {
+            chainDomino = Utils.selectedListDomino(Utils.getRandomCount(-1));
+            Utils.fillAllChain(chainDomino);
+            message = "Набор доминошек: " + chainDomino;
         }
-        else if( action.equalsIgnoreCase( "edit" ) ) {
-            forward = INSERT_OR_EDIT;
-            int studentId = Integer.parseInt( request.getParameter("studentId") );
-            Student student = dao.getStudentById(studentId);
-            request.setAttribute("student", student);
-        }
-        else if( action.equalsIgnoreCase( "insert" ) ) {
-            forward = INSERT_OR_EDIT;
-        }
-        else {
-            forward = lIST_STUDENT;
-            request.setAttribute("students", dao.getAllStudents() );
-        }
-        RequestDispatcher view = request.getRequestDispatcher( forward );
-        view.forward(request, response);
+
+        request.setAttribute("message", message);
+        request.getRequestDispatcher("Create.jsp").forward(request, response);
     }
- 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Student student = new Student();
-        student.setFirstName( request.getParameter( "firstName" ) );
-        student.setLastName( request.getParameter( "lastName" ) );
-        student.setCourse( request.getParameter( "course" ) );
-        student.setYear( Integer.parseInt( request.getParameter( "year" ) ) );
-        String studentId = request.getParameter("studentId");
- 
-        if( studentId == null || studentId.isEmpty() )
-            dao.addStudent(student);
-        else {
-            student.setStudentId( Integer.parseInt(studentId) );
-            dao.updateStudent(student);
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        if (chainDomino != null) {
+            request.setAttribute("current_set", chainDomino);
         }
-        RequestDispatcher view = request.getRequestDispatcher( lIST_STUDENT );
-        request.setAttribute("students", dao.getAllStudents());
-        view.forward(request, response);
+
+        dominoDAO.saveChains(chainDomino);
+        request.getRequestDispatcher("Result.jsp").forward(request, response);
     }
-	 */
 }
