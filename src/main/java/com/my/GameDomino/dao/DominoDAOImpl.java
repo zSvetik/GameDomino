@@ -1,104 +1,120 @@
 package com.my.GameDomino.dao;
 
-import java.sql.Connection;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jetty.util.StringUtil;
 
 import com.my.GameDomino.config.Configuration;
+import com.my.GameDomino.entity.*;
+import com.my.GameDomino.utils.Utils;
 
 public class DominoDAOImpl implements DominoDAO {
 
-	private Connection connection;
+    public DominoDAOImpl() {
+    }
 
-	public DominoDAOImpl() {
-		connection = Configuration.getInstance().getConnection();
-	}
-	
-	/*
-	 @Override
-    public void addStudent( Student student ) {
-        try {
-            String query = "insert into student (firstName, lastName, course, year) values (?,?,?,?)";
-            PreparedStatement preparedStatement = conn.prepareStatement( query );
-            preparedStatement.setString( 1, student.getFirstName() );
-            preparedStatement.setString( 2, student.getLastName() );
-            preparedStatement.setString( 3, student.getCourse() );
-            preparedStatement.setInt( 4, student.getYear() );
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
     @Override
-    public void deleteStudent( int studentId ) {
-        try {
-            String query = "delete from student where studentId=?";
-            PreparedStatement preparedStatement = conn.prepareStatement(query);
-            preparedStatement.setInt(1, studentId);
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public boolean saveChains(ChainDomino chainDomino) {
+        boolean result = saveAllChains(chainDomino);
+        if (result) {
+            Utils.deselectListDomino();
         }
+        return result;
     }
-    @Override
-    public void updateStudent( Student student ) {
-        try {
-            String query = "update student set firstName=?, lastName=?, course=?, year=? where studentId=?";
-            PreparedStatement preparedStatement = conn.prepareStatement( query );
-            preparedStatement.setString( 1, student.getFirstName() );
-            preparedStatement.setString( 2, student.getLastName() );
-            preparedStatement.setString( 3, student.getCourse() );
-            preparedStatement.setInt( 4, student.getYear() );
-            preparedStatement.setInt(5, student.getStudentId());
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    @Override
-    public List<Student> getAllStudents() {
-        List<Student> students = new ArrayList<Student>();
-        try {
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery( "select * from student" );
-            while( resultSet.next() ) {
-                Student student = new Student();
-                student.setStudentId( resultSet.getInt( "studentId" ) );
-                student.setFirstName( resultSet.getString( "firstName" ) );
-                student.setLastName( resultSet.getString( "lastName" ) );
-                student.setCourse( resultSet.getString( "course" ) );
-                student.setYear( resultSet.getInt( "year" ) );
-                students.add(student);
+
+    public boolean saveAllChains(ChainDomino chainDomino) {
+        try (Connection connection = Configuration.getInstance().getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(createInsert(chainDomino))) {
+                preparedStatement.executeUpdate();
             }
-            resultSet.close();
-            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return students;
+        return true;
     }
+
     @Override
-    public Student getStudentById(int studentId) {
-        Student student = new Student();
-        try {
-            String query = "select * from student where studentId=?";
-            PreparedStatement preparedStatement = conn.prepareStatement( query );
-            preparedStatement.setInt(1, studentId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while( resultSet.next() ) {
-                student.setStudentId( resultSet.getInt( "studentId" ) );
-                student.setFirstName( resultSet.getString( "firstName" ) );
-                student.setLastName( resultSet.getString( "LastName" ) );
-                student.setCourse( resultSet.getString( "course" ) );
-                student.setYear( resultSet.getInt( "year" ) );
+    public ChainDomino getChainsById(String id) {
+        ChainDomino result = new ChainDomino();
+        String query = "SELECT dc.id_chain, dc.chain, dch.id_chainhistory, dch.chainhistory \n" + "FROM DominoChain AS dc \n"
+                + "INNER JOIN DominoChainHistory AS dch ON dc.id_chain = dch.id_chain \n" + "AND dc.id_chain = ?";
+        try (Connection connection = Configuration.getInstance().getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, id);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        ChainDominoHistory chainDominoHistory = new ChainDominoHistory();
+                        chainDominoHistory.setId(resultSet.getString("id_chainhistory"));
+                        chainDominoHistory.setStringChainHistory(resultSet.getString("chainhistory"));
+
+                        result.setId(resultSet.getString("id_chain"));
+                        result.setStringListDomino(resultSet.getString("chain"));
+                        result.getListChainDominoHistory().add(chainDominoHistory);
+                    }
+                }
             }
-            resultSet.close();
-            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return student;
+        return result;
     }
-	 */
+
+    @Override
+    public List<ChainDomino> getAllChains() {
+        List<ChainDomino> result = new ArrayList<>();
+        ChainDomino chainDomino = new ChainDomino();
+        String query = "SELECT dc.id_chain, dc.chain, dch.id_chainhistory, dch.chainhistory \n" + "FROM DominoChain AS dc \n"
+                + "INNER JOIN DominoChainHistory AS dch ON dc.id_chain = dch.id_chain ";
+        try (Connection connection = Configuration.getInstance().getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        ChainDominoHistory chainDominoHistory = new ChainDominoHistory();
+                        chainDominoHistory.setId(resultSet.getString("id_chainhistory"));
+                        chainDominoHistory.setStringChainHistory(resultSet.getString("chainhistory"));
+
+                        chainDomino.setId(resultSet.getString("id_chain"));
+                        chainDomino.setStringListDomino(resultSet.getString("chain"));
+                        chainDomino.getListChainDominoHistory().add(chainDominoHistory);
+                        result.add(chainDomino);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private String createInsert(ChainDomino chainDomino) {
+        String id = makeId();
+        int idChainDominoHistory = 0;
+        StringBuilder insert = new StringBuilder(
+                String.format("INSERT INTO DominoChain (id_chain, chain) values (%1, %2); ", id, chainDomino.getStringListDomino()));
+
+        boolean isFirst = true;
+        for (ChainDominoHistory chainDominoHistory : chainDomino.getListChainDominoHistory()) {
+            if (isFirst) {
+                insert.append(String.format("INSERT INTO DominoChainHistory (id_chain, id_chainhistory, chainhistory) values (%1, %2, %3)",
+                        id, idChainDominoHistory++, chainDominoHistory.getStringChainHistory()));
+                isFirst = false;
+            } else {
+                insert.append(String.format(", (%1, %2, %3)", id, idChainDominoHistory++, chainDominoHistory.getStringChainHistory()));
+            }
+        }
+        return insert.toString();
+    }
+
+    private String makeId() {
+        String id = Utils.randomString();
+        while (true) {
+            if (StringUtil.isBlank(getChainsById(id).getId())) {
+                return id;
+            }
+            id = Utils.randomString();
+        }
+    }
 }
