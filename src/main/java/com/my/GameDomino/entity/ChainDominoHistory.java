@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class ChainDominoHistory implements Serializable {
 
     private String id;
-    private String stringChainHistory;
+    private String stringChainHistory = "";
 
     public ChainDominoHistory() {
     }

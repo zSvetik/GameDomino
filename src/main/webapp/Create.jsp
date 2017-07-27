@@ -29,7 +29,7 @@
 			<c:out value="${message}" />
 		</p>
 	</form>
-	<form action="/showResult" method="post">
+	<form action="/setDominoList" method="post">
 		<button type="submit">Смотреть результат</button>
 	</form>
 

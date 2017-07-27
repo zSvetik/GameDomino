@@ -18,12 +18,15 @@ public class DominoController extends HttpServlet {
     private DominoDAO dominoDAO;
     ChainDomino chainDomino;
 
-    public DominoController() {
-        dominoDAO = new DominoDAOImpl();
+    
+    public void init(ServletConfig config) throws ServletException {
+    	dominoDAO = new DominoDAOImpl();
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String message = "";
+        Utils.deselectListDomino();
         if ("set".equalsIgnoreCase(request.getParameter("type"))) {
             if (!"".equalsIgnoreCase(request.getParameter("count"))) {
                 int count = Integer.parseInt(request.getParameter("count"));

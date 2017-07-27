@@ -6,23 +6,21 @@
         version="3.0">
     <display-name>DominoApp</display-name>
     <servlet>
-        <servlet-name>CreateSet</servlet-name>
-        <servlet-class>com.my.JettyWebSocket.HelloHandler</servlet-class>
+        <servlet-name>DominoController</servlet-name>
+        <servlet-class>com.my.GameDomino.controller.DominoController</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>CreateSet</servlet-name>
-        <url-pattern>CreateSet</url-pattern>
+        <servlet-name>DominoController</servlet-name>
+        <url-pattern>/setDominoList</url-pattern>
     </servlet-mapping>
-    <!-- 
     <servlet>
-        <servlet-name>ResultComb</servlet-name>
-        <servlet-class>com.my.JettyWebSocket.ResultComb</servlet-class>
+        <servlet-name>HistoryController</servlet-name>
+        <servlet-class>com.my.GameDomino.controller.HistoryController</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>ResultComb</servlet-name>
-        <url-pattern>Result</url-pattern>
+        <servlet-name>HistoryController</servlet-name>
+        <url-pattern>/showResult</url-pattern>
     </servlet-mapping>
-     -->
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

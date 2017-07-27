@@ -8,7 +8,7 @@ public class Utils {
 
     private static final int MAX_POINT_ON_ONE_SIDE_DOMINO = 6;
     public static final ListDomino ALL_LIST_DOMINO = new ListDomino(createDominoList(MAX_POINT_ON_ONE_SIDE_DOMINO));
-    private static ListDomino TMP_CHAIN = new ListDomino(Collections.nCopies(MAX_POINT_ON_ONE_SIDE_DOMINO, null));
+    private static ListDomino TMP_CHAIN = new ListDomino(Collections.nCopies(28, null));
     private static int END_ELEMENT = 0;
     private static ChainDomino INNER_CHAIN_DOMINO;
 
@@ -19,7 +19,7 @@ public class Utils {
     public static List<Integer> getRandomCount(int count) {
         List<Integer> result = new ArrayList<>();
         Random random = new Random();
-        if (count < 0) {
+        if (count < 1) {
             count = random.nextInt(28);
         }
         for (int i = 0; ((i < count) && (count < 28)); i++) {
@@ -52,7 +52,7 @@ public class Utils {
                 listDomino.addDomino(allDomino);
             }
         }
-        result.setStringListDomino(listDomino.toString());
+        result.setStringChainDomino(listDomino.toString());
         return result;
     }
 
