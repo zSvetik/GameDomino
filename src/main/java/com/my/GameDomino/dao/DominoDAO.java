@@ -1,11 +1,14 @@
 package com.my.GameDomino.dao;
 
+import java.util.List;
+
+import com.my.GameDomino.entity.*;
+
 public interface DominoDAO {
-/*
- public void addStudent( Student student );
-    public void deleteStudent( int studentId );
-    public void updateStudent( Student student );
-    public List<Student> getAllStudents();
-    public Student getStudentById( int studentId );
- */
+
+    public boolean saveChains(ChainDomino chainDomino);
+
+    public ChainDomino getChainsById(String id);
+
+    public List<ChainDomino> getAllChains();
 }
