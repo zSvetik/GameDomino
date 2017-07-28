@@ -39,11 +39,20 @@ public class DominoDAOImpl implements DominoDAO {
     }
 
     public boolean saveAllChains(ChainDomino chainDomino) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(createInsert(chainDomino))) {
-            preparedStatement.executeUpdate();
+    	try (Statement statement = connection.createStatement()) {
+    		connection.setAutoCommit(false);
+    		createInsert(statement, chainDomino);
+    		statement.executeBatch();
+    		connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } finally {
+        	try {
+				connection.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}        	
         }
         return true;
     }
@@ -102,29 +111,20 @@ public class DominoDAOImpl implements DominoDAO {
         return result;
     }
 
-    private String createInsert(ChainDomino chainDomino) {
+    private void createInsert(Statement statement, ChainDomino chainDomino) throws SQLException {
         String id = chainDomino.getId();
         if (StringUtil.isBlank(id)) {
             id = makeId();
         }
         int idChainDominoHistory = 0;
-        StringBuilder insert = new StringBuilder(String.format("INSERT INTO DominoChain (id_chain, chain) values ('%1$s', '%2$s'); \n", id,
+        statement.addBatch(String.format("INSERT INTO DominoChain (id_chain, chain) values ('%1$s', '%2$s')", id,
                 chainDomino.getStringChainDomino()));
 
-        boolean isFirst = true;
         for (ChainDominoHistory chainDominoHistory : chainDomino.getListChainDominoHistory()) {
-            if (isFirst) {
-                insert.append(String.format(
-                        "INSERT INTO DominoChainHistory (id_chain, id_chainhistory, chainhistory) values ('%1$s', '%2$d', '%3$s')", id,
+        	statement.addBatch(String.format(
+                        "INSERT INTO `DominoChainHistory` (id_chain, id_chainhistory, chainhistory) values ('%1$s', '%2$d', '%3$s')", id,
                         idChainDominoHistory++, chainDominoHistory.getStringChainHistory()));
-                isFirst = false;
-            } else {
-                insert.append(String.format(", \n('%1$s', '%2$d', '%3$s')", id, idChainDominoHistory++,
-                        chainDominoHistory.getStringChainHistory()));
-            }
         }
-        System.out.println(insert);
-        return insert.toString();
     }
 
     private String makeId() {
