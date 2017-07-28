@@ -53,6 +53,20 @@ public class Utils {
             }
         }
         result.setStringChainDomino(listDomino.toString());
+        fillAllChain(result);
+        return result;
+    }
+
+    public static ChainDomino getUsedDomino() {
+        ChainDomino result = new ChainDomino();
+        ListDomino listDomino = new ListDomino();
+        for (Domino allDomino : ALL_LIST_DOMINO.getListDomino()) {
+            if (allDomino.isUsed()) {
+                listDomino.addDomino(allDomino);
+            }
+        }
+        result.setStringChainDomino(listDomino.toString());
+        fillAllChain(result);
         return result;
     }
 
