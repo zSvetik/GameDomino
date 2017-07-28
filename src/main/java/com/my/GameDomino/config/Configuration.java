@@ -38,6 +38,7 @@ public class Configuration {
             Class.forName(driver);
             connection = DriverManager.getConnection(url, user, password);
             System.out.println("Successful connection.");
+            // createTablesInDB();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed connection:" + e.getMessage());
@@ -51,6 +52,17 @@ public class Configuration {
             return;
         try {
             toBeClosed.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createTablesInDB() {
+        String sql = "CREATE TABLE IF NOT EXISTS `dominochain` (`id_chain` varchar(50) NOT NULL, `chain` varchar(255) NOT NULL, PRIMARY KEY (`id_chain`)); \n"
+                + "CREATE TABLE IF NOT EXISTS `dominochainhistory` (`id_chainhistory` varchar(50) NOT NULL, `id_chain` varchar(50) NOT NULL, `chainhistory` varchar(255) NOT NULL, PRIMARY KEY (`id_chainhistory`, `id_chain`));";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.executeUpdate();
+            System.out.println("Tables created.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
