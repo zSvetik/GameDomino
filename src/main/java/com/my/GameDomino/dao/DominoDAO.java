@@ -8,7 +8,9 @@ public interface DominoDAO {
 
     public boolean saveChains(ChainDomino chainDomino);
 
-    public ChainDomino getChainsById(String id);
+    public ChainDomino getChainById(String id);
 
     public List<ChainDomino> getAllChains();
+
+    public boolean deleteChainsById(String id);
 }
