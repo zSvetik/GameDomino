@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.my.GameDomino.entity.*;
@@ -25,6 +26,7 @@ public class DominoDAOTest {
                         new ChainDominoHistory("4", "[{[5:5], [1:5], [0:1]}]"), new ChainDominoHistory("5", "[{[5:5], [3:5]}]")));
     }
 
+    @Ignore
     @Test
     public void crdChainTest() {
         String id = "0000000000000";
