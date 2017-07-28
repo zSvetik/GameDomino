@@ -16,44 +16,43 @@ public class DominoController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private DominoDAO dominoDAO;
-    ChainDomino chainDomino;
 
-    
     public void init(ServletConfig config) throws ServletException {
-    	dominoDAO = new DominoDAOImpl();
+        dominoDAO = new DominoDAOImpl();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String message = "";
+        ChainDomino chainDomino = null;
+        String message;
         Utils.deselectListDomino();
         if ("set".equalsIgnoreCase(request.getParameter("type"))) {
             if (!"".equalsIgnoreCase(request.getParameter("count"))) {
                 int count = Integer.parseInt(request.getParameter("count"));
                 chainDomino = Utils.selectedListDomino(Utils.getRandomCount(count));
-                Utils.fillAllChain(chainDomino);
                 message = "Набор из " + count + " доминошек: " + chainDomino;
             } else {
                 message = "Введите количество доминошек!";
             }
         } else {
             chainDomino = Utils.selectedListDomino(Utils.getRandomCount(-1));
-            Utils.fillAllChain(chainDomino);
             message = "Набор доминошек: " + chainDomino;
         }
-
+        HttpSession session = request.getSession();
+        session.setAttribute("current_set", chainDomino);
+        
         request.setAttribute("message", message);
         request.getRequestDispatcher("Create.jsp").forward(request, response);
     }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        HttpSession session = request.getSession();
+        ChainDomino chainDomino = (ChainDomino) session.getAttribute("current_set");
         if (chainDomino != null) {
-            request.setAttribute("current_set", chainDomino);
+            dominoDAO.saveChains(chainDomino);
         }
 
-        dominoDAO.saveChains(chainDomino);
         request.getRequestDispatcher("Result.jsp").forward(request, response);
     }
 }
